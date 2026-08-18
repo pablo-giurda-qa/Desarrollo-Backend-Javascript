@@ -43,7 +43,6 @@ console.log("Bienvenido a la concesionaria JS")
 const arrayVehiculos = [vehiculo1, vehiculo2, vehiculo3];
 
 // Al final, crear una funcion que itere en ese array de objetos y me muestre la informacion de cada objeto asi no repetia codigo
-
 function mostrarInfo(vehiculos) {
     for (const vehiculo of vehiculos) {
         console.log(`Llevate tu ${vehiculo.marca} ${vehiculo.modelo} por un precio total de ${vehiculo.precio}` );
