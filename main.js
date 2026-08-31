@@ -1,54 +1,71 @@
 
 class Vehiculo{
-    constructor(marca, modelo, precio, stock, venta){
+    constructor(marca, modelo, precio, stock, color){
         this.marca = marca
         this.modelo = modelo
         this.precio = precio
         this.stock = stock
-        this.venta = venta
+        this.color = color
     }
     cuotas(){
-        const cuotaAuto = Math.floor(this.precio/84)
-        console.log(`El plan de 84 cuotas es de ${cuotaAuto} pesos`)
+        return Math.floor(this.precio/84)
     }
-    actualizarStock(){
-        if(this.venta){
-            this.stock -= 1
+}
+const vehiculos = [];
+
+function agregarVehiculo(marca, modelo, precio, stock, color) {
+    const nuevoVehiculo = new Vehiculo(marca, modelo, precio, stock, color);
+    vehiculos.push(nuevoVehiculo);
+}
+agregarVehiculo("Chevrolet", "Onix" , 15000000, 20, "Negro");
+agregarVehiculo("Ford", "Fiesta", 18000000 , 26, "Rojo");
+agregarVehiculo("Peugeot", "208", 20000000, 30, "Negro");
+agregarVehiculo("Volswagen", "Gol", 17000000, 10, "Azul");
+agregarVehiculo("Nissan", "Sentra", 24000000, 8, "Rojo");
+//console.log(vehiculos)
+
+alert("Bienvenido al sistema de gestion de la concesionaria JS")
+let salir = false;
+do{
+    let primerMenu = prompt("Elige una opcion\n 1. Consultar inventario\n 2. Buscar por color\n 3. Suma total por marca\n 4. Suma total del inventario general\n 5. Salir")
+switch(primerMenu){
+    case "1": 
+        const inventario = vehiculos.map((v) => {return{marca:v.marca, modelo:v.modelo, stock:v.stock, valorCuota: v.cuotas()}})
+        console.table(inventario)
+        break;
+    case "2":
+        let menu2;
+        let autoPorColor;
+        do {
+            menu2 = prompt("Elija un color:\n Rojo\n Negro\n Azul").toLowerCase();
+            autoPorColor = vehiculos.filter(v => v.color.toLowerCase() === menu2);
+            if (autoPorColor.length === 0) {
+                alert("Ingrese un color valido");
+            }
+        } while (autoPorColor.length === 0);
+        autoPorColor.forEach(v => {
+            console.log(`El vehiculo ${v.marca} ${v.modelo} está cotizado en ${v.precio}`)
+            console.log(`Y cada cuota en 84 meses es de: $${v.cuotas()}`)})
+        break;
+    case "3":
+        const totalPorMarca = vehiculos.reduce((acum, v) => {
+            acum[v.marca] = (acum[v.marca] || 0) + v.precio * v.stock;
+            return acum;
+        }, {});
+        for (let marca in totalPorMarca) {
+            console.log(`Marca ${marca}: $${totalPorMarca[marca]}`);
         }
-        return this.stock
+        break;
+    case "4":
+        const totalGeneral = vehiculos.reduce((total, v) => total + v.precio * v.stock, 0);
+        console.log(`Total general: $${totalGeneral}`);
+        break;
+    case "5":
+    case null:
+        salir = true;
+        break
+    default:
+        console.log("Opcion Invalida. Ingrese nuevamente")
     }
+} while (!salir) {
 }
-
-const vehiculo1 = new Vehiculo("Chevrolet", "Onix" , 15000000, 20, true);
-const vehiculo2 = new Vehiculo("Ford", "Fiesta", 18000000 , 26, false)
-const vehiculo3 = new Vehiculo("Peugeot", "208", 20000000, 30, true)
-
-console.log("Bienvenido a la concesionaria JS")
-
-// Primero mostraba por console.log cada propiedad del objeto 
-
-// console.log(`LLevate tu ${vehiculo1.marca} ${vehiculo1.modelo} por un precio total de ${vehiculo1.precio}`)
-// vehiculo1.cuotas()
-// console.log(`El stock actual es de ${vehiculo1.actualizarStock()} autos del ${vehiculo1.marca}`)
-
-// console.log(`LLevate tu ${vehiculo2.marca} ${vehiculo2.modelo} por un precio total de ${vehiculo2.precio}`)
-// vehiculo2.cuotas()
-// console.log(`El stock actual es de ${vehiculo2.actualizarStock()} autos del ${vehiculo2.marca}`)
-
-// console.log(`LLevate tu ${vehiculo3.marca} ${vehiculo3.modelo} por un precio total de ${vehiculo3.precio}`)
-// vehiculo3.cuotas()
-// console.log(`El stock actual es de ${vehiculo3.actualizarStock()} autos del ${vehiculo3.marca}`)
-
-//Luego preferi almacenar los objetos en variables
-const arrayVehiculos = [vehiculo1, vehiculo2, vehiculo3];
-
-// Al final, crear una funcion que itere en ese array de objetos y me muestre la informacion de cada objeto asi no repetia codigo
-function mostrarInfo(vehiculos) {
-    for (const vehiculo of vehiculos) {
-        console.log(`Llevate tu ${vehiculo.marca} ${vehiculo.modelo} por un precio total de ${vehiculo.precio}` );
-        vehiculo.cuotas();
-        console.log(`El stock actual es de ${vehiculo.actualizarStock()} autos de ${vehiculo.marca}`);
-    }
-}
-
-mostrarInfo(arrayVehiculos)
