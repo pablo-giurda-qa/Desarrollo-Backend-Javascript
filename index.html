@@ -1,13 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="./main.js" defer></script>
+    <link rel="stylesheet" href="./style.css">
     <title>Curso Javascript</title>
 </head>
 <body>
     <h1>Curso de Javascript</h1>
-    <h2>Sexta clase 24/08</h2>
+    <h2>Septima clase 31/08</h2>
+    <h3>Sistema de gestion de consecionaria JS</h3>
+    <section id = "buscar-vehiculo">
+        <h2>Buscar Vehículo</h2>
+        <input type="text" id="buscar" placeholder="Buscar vehiculo por marca o modelo">
+        <div id="resultado-busqueda"></div>
+    </section>
+    <h2>Vehículos disponibles</h2>
+    <section id="vehiculos">
+    </section>
+    <div id="mensajes"></div>
+    <h2>Area de entrega</h2>
+    <section id="entrega">
+    </section>
+    <h3>Agregar un nuevo vehiculo</h3>
+    <section id="agregar-vehiculo">
+        <input type="text" id="marca" placeholder="Marca">
+        <input type="text" id="modelo" placeholder="Modelo">
+        <input type="number" id="stock" placeholder="Stock">
+        <input type="number" id="valor" placeholder="Valor">
+        <button id="btn-agregar">Agregar Vehículo</button>
+    </section>
 </body>
 </html>
