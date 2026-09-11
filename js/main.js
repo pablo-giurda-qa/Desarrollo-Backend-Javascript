@@ -36,15 +36,28 @@ const vehiculos = [
     }
 ];
 
+!localStorage.getItem("autos") ? localStorage.setItem("autos", JSON.stringify(vehiculos)) : null;
+!localStorage.getItem("entregas") ? localStorage.setItem("entregas",JSON.stringify([])) : null;
+
+const autosEnLocalStorage = JSON.parse(localStorage.getItem("autos"))
+const entregasStorage = JSON.parse(localStorage.getItem("entregas"))
 //Crear contenedores para los vehiculos y el area de entrega
 const itemsContainer = document.getElementById("vehiculos");
 const entregaContainer = document.getElementById("entrega");
-entregaContainer.innerHTML = "";
+
+//Funcion para actualizar vehiculos en localStorage
+function actualizarAutosEnLS(){
+    localStorage.setItem("autos",JSON.stringify(autosEnLocalStorage))
+}
+//Funcion para actualizar entregas en localStorage
+function actualizarEntregasEnLS(){
+    localStorage.setItem("entregas", JSON.stringify(entregasStorage))
+}
 
 //Funcion para mostrar los vehiculos en el contenedor
 function mostrarVehiculos() {
     itemsContainer.innerHTML = "";
-    vehiculos.forEach((v) => {
+    autosEnLocalStorage.forEach((v) => {
         const card = document.createElement("article");
         card.classList.add("item")
         card.innerHTML += `
@@ -59,8 +72,9 @@ function mostrarVehiculos() {
         botonAgregar.addEventListener("click", () => {
             //Verifico con el if si hay stock disponible, si no hay stock, elimino el vehiculo del contenedor y muestro un mensaje de error
             if (v.stock <= 0) {
-                const indice = vehiculos.indexOf(v);
-                vehiculos.splice(indice, 1);
+                const indice = autosEnLocalStorage.indexOf(v);
+                autosEnLocalStorage.splice(indice, 1);
+                actualizarAutosEnLS();
                 mostrarVehiculos();
                 mostrarMensaje(`<p>No hay stock disponible para el vehiculo ${v.marca} ${v.modelo}</p>`, "error");
                 return;
@@ -70,24 +84,42 @@ function mostrarVehiculos() {
             card.querySelector(".stock").textContent = `Stock: ${v.stock}`;
             mostrarMensaje(`El vehiculo ${v.marca} ${v.modelo} ha sido preparado para entregar`, "exito");
             
-            const cardEntrega = document.createElement("article");
-            cardEntrega.classList.add("itemEntrega")
-            cardEntrega.innerHTML += `
-                <h4>${v.marca} ${v.modelo}</h4>
-                <p>Valor: $${v.valor}</p>
-                <p>Valor cuota con plan 84 cuotas: $${(v.valor / 84).toFixed(2)}</p>
-                <button>Entregar</button>`
-            entregaContainer.appendChild(cardEntrega);
-            const botonEntregar = cardEntrega.querySelector("button");
-            botonEntregar.addEventListener("click", () => {
-                mostrarMensaje(`El vehiculo ${v.marca} ${v.modelo} ha sido entregado`, "exito");
-                cardEntrega.remove();
-            });
+            actualizarAutosEnLS();
+            function entrega(){
+            const { id, marca, modelo, valor } = v;
+            const entregaStorage = { id, marca, modelo, valor };
+            entregasStorage.push(entregaStorage);
+            actualizarEntregasEnLS();
+                mostrarEntrega(entregasStorage);
+            }
+            entrega();
         })
     })
 };
 mostrarVehiculos();
+mostrarEntrega(entregasStorage);
 
+function mostrarEntrega(array){
+    entregaContainer.innerHTML = "";
+    array.forEach(e => {
+        const cardEntrega = document.createElement("article");
+        cardEntrega.classList.add("itemEntrega")
+        cardEntrega.innerHTML += `
+            <h4>${e.marca} ${e.modelo}</h4>
+            <p>Valor: $${e.valor}</p>
+            <p>Valor cuota con plan 84 cuotas: $${(e.valor / 84).toFixed(2)}</p>
+            <button>Entregar</button>`
+        entregaContainer.appendChild(cardEntrega);
+        const botonEntregar = cardEntrega.querySelector("button");
+        botonEntregar.addEventListener("click", () => {
+            mostrarMensaje(`El vehiculo ${e.marca} ${e.modelo} ha sido entregado`, "exito");
+            cardEntrega.remove();
+            const indice = entregasStorage.findIndex(i => i.id === e.id);
+            entregasStorage.splice(indice, 1);
+            actualizarEntregasEnLS()
+        });
+    })
+}
 
 //Esta funcion agrega un vehiculo al array de vehiculos, si el vehiculo ya existe, le suma el stock, si no existe, lo agrega al array
 function agregarVehiculo() {
@@ -103,7 +135,7 @@ function agregarVehiculo() {
             return;
         }
         //Valida si los campos coinciden con algun vehiculo existente
-        const existe = vehiculos.find(v =>
+        const existe = autosEnLocalStorage.find(v =>
             v.marca.toLowerCase() === marca.toLowerCase() &&
             v.modelo.toLowerCase() === modelo.toLowerCase()
         );
@@ -111,19 +143,25 @@ function agregarVehiculo() {
         if (existe) {
             existe.stock += stock;
             existe.valor = valor; // Actualiza el valor del vehículo existente
+            actualizarAutosEnLS();
             mostrarMensaje(`<p>Se agregaron ${stock} unidades a ${existe.marca} ${existe.modelo}. Stock: ${existe.stock}</p>`, "exito");
         } else {
-            const nuevoId = Math.max(...vehiculos.map(v => v.id)) + 1;
-            vehiculos.push({
+            const nuevoId = Math.max(...autosEnLocalStorage.map(v => v.id)) + 1;
+            autosEnLocalStorage.push({
                 id: nuevoId,
                 marca: marca,
                 modelo: modelo,
                 stock: stock,
                 valor: valor
             });
+            actualizarAutosEnLS();            
             mostrarMensaje(`<p>Vehículo ${marca} ${modelo} agregado con ${stock} unidades</p>`, "exito");
         }
         mostrarVehiculos();
+        document.getElementById("marca").value = "";
+        document.getElementById("modelo").value = "";
+        document.getElementById("stock").value = "";
+        document.getElementById("valor").value = "";
     })
 };
 agregarVehiculo();
@@ -152,7 +190,7 @@ function buscarVehiculo() {
                 return;
             }
 
-            const autoFiltrado = vehiculos.find(v =>
+            const autoFiltrado = autosEnLocalStorage.find(v =>
                 v.marca.toLowerCase().includes(busqueda) ||
                 v.modelo.toLowerCase().includes(busqueda)
             );
@@ -162,7 +200,6 @@ function buscarVehiculo() {
                 resultadoDiv.innerHTML = "";
                 return;
             }
-
             resultadoDiv.innerHTML = `
                 <article class="item">
                     <h4>${autoFiltrado.marca} ${autoFiltrado.modelo}</h4>
@@ -170,6 +207,7 @@ function buscarVehiculo() {
                     <p class="stock">Stock: ${autoFiltrado.stock}</p>
                 </article>
             `;
+            inputBuscar.value = "";
         }
     });
 }
