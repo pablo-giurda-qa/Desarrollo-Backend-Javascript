@@ -179,7 +179,7 @@ h3 {
     color: #52525b;
 }
 
-#agregar-vehiculo button {
+#agregar-vehiculo button{
     background-color: #eab308;
     color: #0a0a0a;
     border: none;
@@ -202,4 +202,28 @@ h3 {
     font-size: 0.95rem;
     outline: none;
     transition: border-color 0.2s;
+}
+
+#eliminar-entregas{
+    background-color: #eab308;
+    color: #0a0a0a;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+#eliminar-entregas:hover {
+    opacity: 0.85;
+}
+
+#aviso-bienvenida {
+    background-color: #eab308;
+    color: #0a0a0a;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    font-weight: bold;
 }

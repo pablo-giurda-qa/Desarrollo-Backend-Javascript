@@ -36,22 +36,46 @@ const vehiculos = [
     }
 ];
 
-!localStorage.getItem("autos") ? localStorage.setItem("autos", JSON.stringify(vehiculos)) : null;
-!localStorage.getItem("entregas") ? localStorage.setItem("entregas",JSON.stringify([])) : null;
 
-const autosEnLocalStorage = JSON.parse(localStorage.getItem("autos"))
-const entregasStorage = JSON.parse(localStorage.getItem("entregas"))
+function iniciarDelLocalStorage(nombre, array){
+    try {
+        const datos = localStorage.getItem(nombre);
+        return datos ? JSON.parse(datos) : array
+    } catch (error) {
+        console.error(`Error al leer ${nombre}`, error)
+        return array;
+    }
+}
+
+const autosEnLocalStorage = iniciarDelLocalStorage("autos", vehiculos);
+const entregasStorage = iniciarDelLocalStorage("entregas", []);
+
 //Crear contenedores para los vehiculos y el area de entrega
 const itemsContainer = document.getElementById("vehiculos");
 const entregaContainer = document.getElementById("entrega");
 
-//Funcion para actualizar vehiculos en localStorage
+//Funcion para actualizar vehiculos en localStorage ahora con try y catch
 function actualizarAutosEnLS(){
-    localStorage.setItem("autos",JSON.stringify(autosEnLocalStorage))
-}
-//Funcion para actualizar entregas en localStorage
+    try {
+        localStorage.setItem("autos",JSON.stringify(autosEnLocalStorage));
+    }catch (error){
+        console.error("No se pudo guardar la lista de autos (almacenamiento lleno o deshabilitado):", error);
+        mostrarMensaje("No se pudo guardar el cambio en el almacenamiento", "error");
+    } finally {
+        console.log("Lista de vehículos actualizada");
+    }
+};
+
+//Funcion para actualizar entregas en localStorage ahora con try y catch
 function actualizarEntregasEnLS(){
-    localStorage.setItem("entregas", JSON.stringify(entregasStorage))
+    try {
+        localStorage.setItem("entregas", JSON.stringify(entregasStorage));
+    } catch (error) {
+        console.error("No se pudo guardar la lista de entregas:", error);
+        mostrarMensaje("No se pudo guardar el cambio en el almacenamiento", "error");
+    } finally {
+        console.log("Lista de entregas actualizada");
+    }
 }
 
 //Funcion para mostrar los vehiculos en el contenedor
@@ -90,17 +114,19 @@ function mostrarVehiculos() {
             const entregaStorage = { id, marca, modelo, valor };
             entregasStorage.push(entregaStorage);
             actualizarEntregasEnLS();
-                mostrarEntrega(entregasStorage);
-            }
-            entrega();
+            mostrarEntrega(entregasStorage);
+        }
+        entrega();;
         })
     })
 };
 mostrarVehiculos();
 mostrarEntrega(entregasStorage);
+eliminarEntregas();
 
 function mostrarEntrega(array){
     entregaContainer.innerHTML = "";
+    
     array.forEach(e => {
         const cardEntrega = document.createElement("article");
         cardEntrega.classList.add("itemEntrega")
@@ -166,7 +192,7 @@ function agregarVehiculo() {
 };
 agregarVehiculo();
 
-//En lugar de utilizar alert, muestro un mensaje en el contenedor de mensajes
+//En lugar de utilizar alert, muestro un mensaje en el contenedor de mensajes con setTImeout()
 function mostrarMensaje(texto, tipo) {
     const mensajesDiv = document.getElementById("mensajes");
     mensajesDiv.innerHTML = texto;
@@ -208,7 +234,38 @@ function buscarVehiculo() {
                 </article>
             `;
             inputBuscar.value = "";
+            //Hace que la busqueda quede vacia despues de 5 segundos
+            setTimeout(() => {
+            resultadoDiv.innerHTML = "";
+            }, 5000);
         }
     });
 }
 buscarVehiculo();
+
+function eliminarEntregas (){
+    const btnEliminarEntregas = document.getElementById("eliminar-entregas");
+    btnEliminarEntregas.addEventListener("click", () => {
+            localStorage.removeItem("entregas")
+            entregasStorage.length = 0;
+            mostrarEntrega(entregasStorage);
+            mostrarMensaje("Entregas eliminadas correctamente", "exito");
+    })
+}
+
+setTimeout(() => {
+    const avisoBienvenida = document.createElement("aside");
+    avisoBienvenida.id = "aviso-bienvenida";
+
+    if (entregasStorage.length > 0) {
+        avisoBienvenida.textContent =
+            `Bienvenido. Tienes ${entregasStorage.length} entrega(s) pendiente(s).`;
+    } else {
+        avisoBienvenida.textContent =
+            "Bienvenido. No tenés entregas pendientes.";
+    }
+    document.body.prepend(avisoBienvenida);
+    setTimeout(() => {
+        avisoBienvenida.remove();
+    }, 5000);
+}, 1000);
