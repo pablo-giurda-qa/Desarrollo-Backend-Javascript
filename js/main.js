@@ -1,43 +1,59 @@
-const vehiculos = [
-    {
-        id: 1,
-        marca: 'Chevrolet',
-        modelo: 'Onix',
-        stock: 20,
-        valor: 15000000
-    },
-    {
-        id: 2,
-        marca: 'Ford',
-        modelo: 'Fiesta',
-        stock: 26,
-        valor: 18000000
-    },
-    {
-        id: 3,
-        marca: 'Peugeot',
-        modelo: '208',
-        stock: 30,
-        valor: 20000000
-    },
-    {
-        id: 4,
-        marca: 'Volswagen',
-        modelo: 'Gol',
-        stock: 10,
-        valor: 17000000
-    },
-    {
-        id: 5,
-        marca: 'Nissan',
-        modelo: 'Sentra',
-        stock: 8,
-        valor: 24000000
+
+const autos = "./js/vehiculos.json"
+
+
+let autosEnLocalStorage = [];
+
+const entregasStorage = iniciarDelLocalStorage("entregas", []);
+
+//Crear contenedores para los vehiculos y el area de entrega
+const itemsContainer = document.getElementById("vehiculos");
+const entregaContainer = document.getElementById("entrega");
+
+//Cree una funcion para visualizar el mensaje de cargando vehiculos...
+const esperar = (milisegundos) =>
+    new Promise((resolver) => setTimeout(resolver,
+    milisegundos));
+
+// Funcion asincrona para cargar Vehiculos utilizando async/await/fetch
+async function cargarVehiculos() {
+    itemsContainer.innerHTML = "<p class='cargando'>Cargando vehiculos...</p>"
+    try {
+        await esperar(2000)
+        const vehiculosJSON = await fetch(autos);
+        if (!vehiculosJSON.ok) {
+            throw new Error(`Error en la peticion ${vehiculosJSON.status}`)
+        }
+        const vehiculos = await vehiculosJSON.json();
+        autosEnLocalStorage = iniciarDelLocalStorage("autos", vehiculos)
+        mostrarVehiculos();
+        agregarVehiculo()
+        Swal.fire({
+            icon: "success",
+            title: "Vehículos cargados con éxito",
+            text: "La información ya está disponible.",
+            timer: 2500,
+            showConfirmButton: false
+        });
+        setTimeout(()=>{
+            mostrarMensajeSweetAlert()
+        },2000)
+    } catch (error) {
+        console.error("Error al cargar los vehiculos", error)
+        itemsContainer.innerHTML = `
+            <p class="error-carga">No se pudieron cargar los vehículos. Intentá nuevamente más tarde.</p>`;
+        Swal.fire({
+            icon: "error",
+            title: "Error al cargar vehículos",
+            text: "No fue posible obtener los datos solicitados."
+        });
+    } finally {
+        console.log("Finalizó la carga de vehiculos")
     }
-];
+};
 
-
-function iniciarDelLocalStorage(nombre, array){
+//Funcion para agregar el array con su nombre al Storage
+function iniciarDelLocalStorage(nombre, array) {
     try {
         const datos = localStorage.getItem(nombre);
         return datos ? JSON.parse(datos) : array
@@ -45,20 +61,13 @@ function iniciarDelLocalStorage(nombre, array){
         console.error(`Error al leer ${nombre}`, error)
         return array;
     }
-}
-
-const autosEnLocalStorage = iniciarDelLocalStorage("autos", vehiculos);
-const entregasStorage = iniciarDelLocalStorage("entregas", []);
-
-//Crear contenedores para los vehiculos y el area de entrega
-const itemsContainer = document.getElementById("vehiculos");
-const entregaContainer = document.getElementById("entrega");
+};
 
 //Funcion para actualizar vehiculos en localStorage ahora con try y catch
-function actualizarAutosEnLS(){
+function actualizarAutosEnLS() {
     try {
-        localStorage.setItem("autos",JSON.stringify(autosEnLocalStorage));
-    }catch (error){
+        localStorage.setItem("autos", JSON.stringify(autosEnLocalStorage));
+    } catch (error) {
         console.error("No se pudo guardar la lista de autos (almacenamiento lleno o deshabilitado):", error);
         mostrarMensaje("No se pudo guardar el cambio en el almacenamiento", "error");
     } finally {
@@ -67,7 +76,7 @@ function actualizarAutosEnLS(){
 };
 
 //Funcion para actualizar entregas en localStorage ahora con try y catch
-function actualizarEntregasEnLS(){
+function actualizarEntregasEnLS() {
     try {
         localStorage.setItem("entregas", JSON.stringify(entregasStorage));
     } catch (error) {
@@ -107,26 +116,22 @@ function mostrarVehiculos() {
             v.stock--;
             card.querySelector(".stock").textContent = `Stock: ${v.stock}`;
             mostrarMensaje(`El vehiculo ${v.marca} ${v.modelo} ha sido preparado para entregar`, "exito");
-            
-            actualizarAutosEnLS();
-            function entrega(){
+
             const { id, marca, modelo, valor } = v;
             const entregaStorage = { id, marca, modelo, valor };
             entregasStorage.push(entregaStorage);
             actualizarEntregasEnLS();
             mostrarEntrega(entregasStorage);
-        }
-        entrega();;
+            actualizarAutosEnLS();
+            mostrarMensajeSweetAlert()
         })
     })
 };
-mostrarVehiculos();
-mostrarEntrega(entregasStorage);
-eliminarEntregas();
 
-function mostrarEntrega(array){
+//Esta funcion crea una nueva card en el area de entrega con la informacion del storage
+function mostrarEntrega(array) {
     entregaContainer.innerHTML = "";
-    
+
     array.forEach(e => {
         const cardEntrega = document.createElement("article");
         cardEntrega.classList.add("itemEntrega")
@@ -143,9 +148,10 @@ function mostrarEntrega(array){
             const indice = entregasStorage.findIndex(i => i.id === e.id);
             entregasStorage.splice(indice, 1);
             actualizarEntregasEnLS()
+            mostrarMensajeSweetAlert()
         });
     })
-}
+};
 
 //Esta funcion agrega un vehiculo al array de vehiculos, si el vehiculo ya existe, le suma el stock, si no existe, lo agrega al array
 function agregarVehiculo() {
@@ -180,7 +186,7 @@ function agregarVehiculo() {
                 stock: stock,
                 valor: valor
             });
-            actualizarAutosEnLS();            
+            actualizarAutosEnLS();
             mostrarMensaje(`<p>Vehículo ${marca} ${modelo} agregado con ${stock} unidades</p>`, "exito");
         }
         mostrarVehiculos();
@@ -190,7 +196,7 @@ function agregarVehiculo() {
         document.getElementById("valor").value = "";
     })
 };
-agregarVehiculo();
+// agregarVehiculo();
 
 //En lugar de utilizar alert, muestro un mensaje en el contenedor de mensajes con setTImeout()
 function mostrarMensaje(texto, tipo) {
@@ -236,36 +242,67 @@ function buscarVehiculo() {
             inputBuscar.value = "";
             //Hace que la busqueda quede vacia despues de 5 segundos
             setTimeout(() => {
-            resultadoDiv.innerHTML = "";
+                resultadoDiv.innerHTML = "";
             }, 5000);
         }
     });
 }
-buscarVehiculo();
 
-function eliminarEntregas (){
+
+function eliminarEntregas() {
     const btnEliminarEntregas = document.getElementById("eliminar-entregas");
     btnEliminarEntregas.addEventListener("click", () => {
-            localStorage.removeItem("entregas")
-            entregasStorage.length = 0;
-            mostrarEntrega(entregasStorage);
-            mostrarMensaje("Entregas eliminadas correctamente", "exito");
+        //Utilizo SweetAlert para confirmar si se desea Limpiar las entregas
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+                cancelButton: "btn btn-danger"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "¿Eliminar todas las entregas?",
+            text: "Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, borrar todas",
+            cancelButtonText: "No, cancelar",
+            reverseButtons: true
+        }).then((resultado) => {
+            if (resultado.isConfirmed) {
+                entregasStorage.length = 0;
+                actualizarEntregasEnLS();
+                mostrarEntrega(entregasStorage);
+                swalWithBootstrapButtons.fire({
+                    title: "Entregas eliminadas",
+                    text: "Las entregas fueron borradas correctamente",
+                    icon: "success"
+                });
+            }
+        });
     })
 }
 
-setTimeout(() => {
-    const avisoBienvenida = document.createElement("aside");
-    avisoBienvenida.id = "aviso-bienvenida";
+//Mensaje SweetAlert que notifica si hay entregas pendientes
+function mostrarMensajeSweetAlert() {
+    Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    }).fire({
+        icon: "success",
+        title: `Tienes ${entregasStorage.length} entrega(s) pendiente(s).`
+    });
+};
 
-    if (entregasStorage.length > 0) {
-        avisoBienvenida.textContent =
-            `Bienvenido. Tienes ${entregasStorage.length} entrega(s) pendiente(s).`;
-    } else {
-        avisoBienvenida.textContent =
-            "Bienvenido. No tenés entregas pendientes.";
-    }
-    document.body.prepend(avisoBienvenida);
-    setTimeout(() => {
-        avisoBienvenida.remove();
-    }, 5000);
-}, 1000);
+
+cargarVehiculos();
+mostrarEntrega(entregasStorage);
+eliminarEntregas();
+buscarVehiculo();

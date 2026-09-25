@@ -1,0 +1,37 @@
+[
+    {
+        "id": 1,
+        "marca": "Chevrolet",
+        "modelo": "Onix",
+        "stock": 20,
+        "valor": 15000000
+    },
+    {
+        "id": 2,
+        "marca": "Ford",
+        "modelo": "Fiesta",
+        "stock": 26,
+        "valor": 18000000
+    },
+    {
+        "id": 3,
+        "marca": "Peugeot",
+        "modelo": "208",
+        "stock": 30,
+        "valor": 20000000
+    },
+    {
+        "id": 4,
+        "marca": "Volswagen",
+        "modelo": "Gol",
+        "stock": 10,
+        "valor": 17000000
+    },
+    {
+        "id": 5,
+        "marca": "Nissan",
+        "modelo": "Sentra",
+        "stock": 8,
+        "valor": 24000000
+    }
+]

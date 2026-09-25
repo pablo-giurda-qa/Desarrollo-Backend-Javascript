@@ -219,11 +219,14 @@ h3 {
     opacity: 0.85;
 }
 
-#aviso-bienvenida {
-    background-color: #eab308;
-    color: #0a0a0a;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 6px;
+.cargando {
+    color: #facc15;
     font-weight: bold;
+    padding: 1rem 0;
+}
+
+.error-carga {
+    color: #ef4444;
+    font-weight: bold;
+    padding: 1rem 0;
 }
