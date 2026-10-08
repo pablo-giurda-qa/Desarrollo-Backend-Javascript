@@ -11,18 +11,32 @@ function mostrarEntrega(array) {
         cardEntrega.classList.add("itemEntrega")
         cardEntrega.innerHTML += `
             <h4>${vehiculoAEntregar.marca} ${vehiculoAEntregar.modelo}</h4>
+            <img src="${vehiculoAEntregar.imagen.replace("./assets/", "../assets/")}" alt="${vehiculoAEntregar.marca} ${vehiculoAEntregar.modelo}">
             <p>Valor: $${vehiculoAEntregar.valor}</p>
             <p>Valor cuota con plan 84 cuotas: $${(vehiculoAEntregar.valor / 84).toFixed(2)}</p>
             <button>Entregar</button>`
         entregaContainer.appendChild(cardEntrega);
         const botonEntregar = cardEntrega.querySelector("button");
-        botonEntregar.addEventListener("click", () => {
+        botonEntregar.addEventListener("click", async () => {
+            const resultado = await Swal.fire({
+                input: "textarea",
+                inputLabel: "¿A quién se entrega el vehículo?",
+                inputPlaceholder: "Ingrese los datos del cliente...",
+                inputAttributes: { "aria-label": "Datos del cliente" },
+                showCancelButton: true,
+                inputValidator: (valor) => {
+                    if (!valor.trim()) {
+                        return "Ingresá los datos del cliente";
+                    }
+                }
+            });
+            if (!resultado.isConfirmed) return;
+            const cliente = resultado.value.trim(); Swal.fire(`EL vehiculo ${vehiculoAEntregar.marca} ${vehiculoAEntregar.modelo} ha sido entregado a ${cliente}`, "");
             mostrarMensaje(`El vehiculo ${vehiculoAEntregar.marca} ${vehiculoAEntregar.modelo} ha sido entregado`, "exito");
             cardEntrega.remove();
             const indice = entregasStorage.findIndex(index => index.id === vehiculoAEntregar.id);
             entregasStorage.splice(indice, 1);
             actualizarArrayEnLS("entregas", entregasStorage);
-            mostrarMensajeSweetAlert();
         });
     })
 };
@@ -48,6 +62,14 @@ function eliminarEntregas() {
             reverseButtons: true
         }).then((resultado) => {
             if (resultado.isConfirmed) {
+                const autosEnLocalStorage = iniciarDelLocalStorage("autos", []);
+                entregasStorage.forEach(entrega => {
+                    const auto = autosEnLocalStorage.find(auto => auto.id === entrega.id);
+                    if (auto) {
+                        auto.stock++;
+                    }
+                    actualizarArrayEnLS("autos", autosEnLocalStorage);
+                });
                 entregasStorage.length = 0;
                 actualizarArrayEnLS("entregas", entregasStorage);
                 mostrarEntrega(entregasStorage);

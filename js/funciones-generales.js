@@ -9,6 +9,7 @@ function iniciarDelLocalStorage(nombre, array) {
     }
 };
 
+//Funcion para actualizar el array en el Storage
 function actualizarArrayEnLS(nombre, array){
     try{
         localStorage.setItem(nombre, JSON.stringify(array))
@@ -19,6 +20,7 @@ function actualizarArrayEnLS(nombre, array){
     }
 }
 
+//Funcion para mostrar un mensaje en el contenedor de mensajes, con un tipo de mensaje (exito o error) y que desaparece luego de 3 segundos
 function mostrarMensaje(texto, tipo) {
     const mensajesDiv = document.getElementById("mensajes");
     mensajesDiv.innerHTML = texto;
@@ -29,6 +31,20 @@ function mostrarMensaje(texto, tipo) {
     }, 3000);
 }
 
+//Funcion que actualiza el contador de entregas pendientes en el boton de navegacion
+function actualizarContadorEntregas() {
+    const contador = document.getElementById("contador-entregas");
+    //La pagina de entregas no tiene contador, asi que sale sin hacer nada
+    if (!contador) {
+        return;
+    }
+    const cantidad = entregasStorage.length;
+    contador.textContent = cantidad;
+    //Sin entregas pendientes el contador se muestra apagado
+    contador.classList.toggle("vacio", cantidad === 0);
+}
+
+//Funcion que muestra un mensaje de SweetAlert con la cantidad de entregas pendientes
 function mostrarMensajeSweetAlert() {
     Swal.mixin({
         toast: true,

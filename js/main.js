@@ -8,13 +8,12 @@ const entregasStorage = iniciarDelLocalStorage("entregas", []);
 //Crear contenedores para los vehiculos y el area de entrega
 const itemsContainer = document.getElementById("vehiculos");
 
-
 // Funcion asincrona para cargar Vehiculos utilizando async/await/fetch
 async function cargarVehiculos() {
     itemsContainer.innerHTML = "<p class='cargando'>Cargando vehiculos...</p>"
     try {
         const vehiculosJSON = await fetch(autos);
-        
+
         if (!vehiculosJSON.ok) {
             throw new Error(`Error en la peticion ${vehiculosJSON.status}`)
         }
@@ -23,6 +22,7 @@ async function cargarVehiculos() {
         autosEnLocalStorage = iniciarDelLocalStorage("autos", vehiculos);
         mostrarVehiculos();
         agregarVehiculo()
+        actualizarContadorEntregas();
         Swal.fire({
             icon: "success",
             title: "Vehículos cargados con éxito",
@@ -30,9 +30,9 @@ async function cargarVehiculos() {
             timer: 2500,
             showConfirmButton: false
         });
-        setTimeout(()=>{
+        setTimeout(() => {
             mostrarMensajeSweetAlert()
-        },2000)
+        }, 2000)
     } catch (error) {
         console.error("Error al cargar los vehiculos", error)
         itemsContainer.innerHTML = `
@@ -47,31 +47,6 @@ async function cargarVehiculos() {
     }
 };
 
-
-//Funcion para actualizar vehiculos en localStorage ahora con try y catch
-// function actualizarAutosEnLS() {
-//     try {
-//         localStorage.setItem("autos", JSON.stringify(autosEnLocalStorage));
-//     } catch (error) {
-//         console.error("No se pudo guardar la lista de autos (almacenamiento lleno o deshabilitado):", error);
-//         mostrarMensaje("No se pudo guardar el cambio en el almacenamiento", "error");
-//     } finally {
-//         console.log("Lista de vehículos actualizada");
-//     }
-// };
-
-//Funcion para actualizar entregas en localStorage ahora con try y catch
-// function actualizarEntregasEnLS() {
-//     try {
-//         localStorage.setItem("entregas", JSON.stringify(entregasStorage));
-//     } catch (error) {
-//         console.error("No se pudo guardar la lista de entregas:", error);
-//         mostrarMensaje("No se pudo guardar el cambio en el almacenamiento", "error");
-//     } finally {
-//         console.log("Lista de entregas actualizada");
-//     }
-// }
-
 //Funcion para mostrar los vehiculos en el contenedor
 function mostrarVehiculos() {
     itemsContainer.innerHTML = "";
@@ -80,6 +55,7 @@ function mostrarVehiculos() {
         card.classList.add("item")
         card.innerHTML += `
         <h4>${auto.marca} ${auto.modelo}</h4>
+        <img src="${auto.imagen}" alt="${auto.marca} ${auto.modelo}">
         <p class="precio">Valor: $${auto.valor}</p>
         <p class="stock">Stock: ${auto.stock}</p>
         <button id="agregar-${auto.id}">Preparar para entregar</button>`
@@ -102,16 +78,16 @@ function mostrarVehiculos() {
             card.querySelector(".stock").textContent = `Stock: ${auto.stock}`;
             mostrarMensaje(`El vehiculo ${auto.marca} ${auto.modelo} ha sido preparado para entregar`, "exito");
 
-            const { id, marca, modelo, valor } = auto;
-            const entregaStorage = { id, marca, modelo, valor };
+            const { id, marca, modelo, valor, imagen } = auto;
+            const entregaStorage = { id, marca, modelo, valor, imagen };
             entregasStorage.push(entregaStorage);
             actualizarArrayEnLS("entregas", entregasStorage);
             actualizarArrayEnLS("autos", autosEnLocalStorage);
+            actualizarContadorEntregas();
             mostrarMensajeSweetAlert()
         })
     })
 };
-
 
 //Esta funcion agrega un vehiculo al array de vehiculos, si el vehiculo ya existe, le suma el stock, si no existe, lo agrega al array
 function agregarVehiculo() {
@@ -135,7 +111,7 @@ function agregarVehiculo() {
         if (existe) {
             existe.stock += stock;
             existe.valor = valor; // Actualiza el valor del vehículo existente
-            // actualizarAutosEnLS();
+            actualizarArrayEnLS("autos", autosEnLocalStorage);
             mostrarMensaje(`<p>Se agregaron ${stock} unidades a ${existe.marca} ${existe.modelo}. Stock: ${existe.stock}</p>`, "exito");
         } else {
             const nuevoId = Math.max(...autosEnLocalStorage.map(vehiculo => vehiculo.id)) + 1;
@@ -144,9 +120,10 @@ function agregarVehiculo() {
                 marca: marca,
                 modelo: modelo,
                 stock: stock,
-                valor: valor
+                valor: valor,
+                imagen: "./assets/default.png" // Imagen por defecto para nuevos vehículos
             });
-            // actualizarAutosEnLS();
+            actualizarArrayEnLS("autos", autosEnLocalStorage);
             mostrarMensaje(`<p>Vehículo ${marca} ${modelo} agregado con ${stock} unidades</p>`, "exito");
         }
         mostrarVehiculos();
@@ -157,14 +134,13 @@ function agregarVehiculo() {
     })
 };
 
-//En lugar de utilizar alert, muestro un mensaje en el contenedor de mensajes con setTImeout()
-
+//Esta funcion busca un vehiculo en el storage y lo muestra en el contenedor de busqueda, si no lo encuentra, muestra un mensaje de error
 function buscarVehiculo() {
     const inputBuscar = document.getElementById("buscar");
     const resultadoDiv = document.getElementById("resultado-busqueda");
 
-    inputBuscar.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
+    inputBuscar.addEventListener("keydown", (enter) => {
+        if (enter.key === "Enter") {
             const busqueda = inputBuscar.value.trim().toLowerCase();
 
             if (!busqueda) {
@@ -187,6 +163,7 @@ function buscarVehiculo() {
                     <h4>${autoFiltrado.marca} ${autoFiltrado.modelo}</h4>
                     <p class="precio">Valor: $${autoFiltrado.valor}</p>
                     <p class="stock">Stock: ${autoFiltrado.stock}</p>
+                    <img src="${autoFiltrado.imagen}" alt="${autoFiltrado.marca} ${autoFiltrado.modelo}">
                 </article>
             `;
             inputBuscar.value = "";
@@ -198,8 +175,74 @@ function buscarVehiculo() {
     });
 }
 
-//Mensaje SweetAlert que notifica si hay entregas pendientes
-
-
 cargarVehiculos();
 buscarVehiculo();
+
+
+const apiDivisas = "https://api.frankfurter.dev/v2/rate/usd/ars";
+
+//Funcion asincrona para consultar la cotizacion del dolar y agregué un conversor
+async function obtenerDivisas() {
+    const divisasContainer = document.querySelector(".divisas");
+    //La pagina podria no tener el bloque de divisas, asi que sale sin hacer nada
+    if (!divisasContainer) {
+        return;
+    }
+
+    divisasContainer.innerHTML = "<p class='cargando'>Consultando la cotización...</p>"
+
+    try {
+        const respuesta = await fetch(apiDivisas);
+
+        if (!respuesta.ok) {
+            throw new Error(`Error en la peticion ${respuesta.status}`)
+        }
+        const divisa = await respuesta.json();
+
+        divisasContainer.innerHTML = `
+            <h3>Cotización del Dólar</h3>
+            <p class="cotizacion">1 USD = ${divisa.rate.toFixed(2)} ARS <span>${divisa.date}</span></p>
+            <div class="conversor">
+                <div class="campo">
+                    <label for="dolares">Dólares</label>
+                    <input type="number" id="dolares" placeholder="0">
+                </div>
+                <span class="flecha" aria-hidden="true">&rarr;</span>
+                <div class="campo">
+                    <label for="resultado-pesos">Pesos</label>
+                    <p id="resultado-pesos"></p>
+                </div>
+            </div>
+            `;
+
+        const inputDolares = document.getElementById("dolares");
+        const resultadoPesos = document.getElementById("resultado-pesos");
+        inputDolares.addEventListener("input", () => {
+            const valorDolares = parseFloat(inputDolares.value);
+
+            if (valorDolares < 0) {
+                inputDolares.value = "";
+                resultadoPesos.textContent = "";
+                return;
+            }
+
+            if (!isNaN(valorDolares)) {
+                const valorPesos = (valorDolares * divisa.rate).toFixed(2);
+                resultadoPesos.textContent = `${valorDolares} USD = ${valorPesos} ARS`;
+            } else {
+                resultadoPesos.textContent = "";
+            }
+        });
+    } catch (error) {
+        console.error("Error al obtener la cotizacion del dolar", error)
+        divisasContainer.innerHTML = `
+            <p class="error-carga">No se pudo consultar la cotización del dólar.</p>
+            <button type="button" class="reintentar">Reintentar</button>`;
+        //El boton vuelve a consultar la API y vuelve a montar el conversor
+        divisasContainer.querySelector(".reintentar").addEventListener("click", () => obtenerDivisas());
+    } finally {
+        console.log("Finalizó la consulta de la cotizacion")
+    }
+};
+
+obtenerDivisas();

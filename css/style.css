@@ -4,230 +4,721 @@
     box-sizing: border-box;
 }
 
+:root {
+    --dark: #050814;
+    --dark2: #0a0f24;
+    --purple: #8D33FF;
+    --purple2: #553199;
+    --teal: #41EBD4;
+    --teal2: #1BBCA1;
+    --white: #ffffff;
+    --text: rgba(255, 255, 255, 0.70);
+    --dim: rgba(255, 255, 255, 0.38);
+    --line: rgba(255, 255, 255, 0.08);
+    --line-fuerte: rgba(255, 255, 255, 0.18);
+    --rojo: #FF5C5C;
+
+    --display: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
+
+    --sdark: 0 24px 64px rgba(0, 0, 0, 0.55);
+    --gprimario: linear-gradient(90deg, var(--purple) 0%, #6b2be8 50%, var(--teal) 100%);
+
+    --r-card: 20px;
+    --r-inner: 14px;
+    --r-pill: 999px;
+    --ancho: 1240px;
+}
+
+html {
+    background-color: var(--dark);
+    background-image: linear-gradient(180deg, #050814 0%, #0a0f24 50%, #050814 100%);
+    background-attachment: fixed;
+}
+
 body {
-    background-color: #0a0a0a;
-    color: #e4e4e7;
-    font-family: system-ui, -apple-system, sans-serif;
-    padding: 2rem;
+    background-color: transparent;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: clamp(15px, 1.2vw, 17px);
+    line-height: 1.6;
+
+    display: flex;
+    flex-direction: column;
+    max-width: var(--ancho);
+    margin-inline: auto;
+    padding: clamp(1.25rem, 0.6rem + 2.4vw, 2.75rem);
+    min-height: 100vh;
 }
 
-h1 {
-    color: #ffffff;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+/* Encabezado de pagina */
+
+body > h1,
+body:has(> #entrega) > h2 {
+    order: -2;
+    color: var(--white);
+    font-family: var(--display);
+    font-size: clamp(27px, 3.4vw, 43px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    padding: clamp(1rem, 0.6rem + 1.6vw, 1.75rem) 0 clamp(1.1rem, 0.8rem + 1.2vw, 1.6rem);
+    animation: entrada 420ms ease-out both;
 }
 
-h2 {
-    color: #22c55e;
-    font-size: 1.4rem;
-    margin: 1.5rem 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #22c55e;
+body > h1::after,
+body:has(> #entrega) > h2::after {
+    content: "";
+    display: block;
+    height: 2px;
+    width: 64px;
+    margin-top: 1rem;
+    border-radius: var(--r-pill);
+    background-image: var(--gprimario);
 }
 
-h3 {
-    color: #eab308;
-    font-size: 1.1rem;
-    margin: 1rem 0 0.8rem;
+@keyframes entrada {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
 }
 
-/* Mensajes */
-#mensajes {
-    display: none;
-    padding: 1rem;
-    border-radius: 8px;
-    margin: 1rem 0;
+/* Navegacion entre areas */
+
+body > a {
+    align-self: flex-end;
+    gap: 10px;
+    margin-top: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+    padding: 9px 9px 9px 18px;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--line-fuerte);
+    border-radius: var(--r-pill);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+body > a:hover {
+    border-color: var(--teal);
+    background-color: rgba(65, 235, 212, 0.08);
+}
+
+body:has(> #entrega) > a {
+    order: -1;
+    align-self: flex-start;
+    gap: 0;
+    margin-top: 1.25rem;
+    padding: 10px 16px;
+    min-height: 42px;
+}
+
+/* Contador de entregas pendientes */
+
+#contador-entregas {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: var(--r-pill);
+    background-image: var(--gprimario);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    transition: background-color 180ms ease, color 180ms ease;
+}
+
+#contador-entregas.vacio {
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--dim);
+}
+
+/* Titulos de seccion */
+
+body > h2,
+body > h3 {
+    color: var(--white);
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: clamp(2.25rem, 1.6rem + 2vw, 3.25rem) 0 0;
+}
+
+body > h2 {
+    font-size: clamp(20px, 1.5vw, 27px);
+}
+
+body > h3 {
+    font-size: clamp(17px, 1.2vw, 21px);
+    margin-top: clamp(2rem, 1.5rem + 1.6vw, 2.75rem);
+    color: var(--dim);
     font-weight: 500;
 }
 
-#mensajes.exito {
-    background-color: #052e16;
-    border: 1px solid #22c55e;
-    color: #facc15;
+/* Busqueda: superficie de comando */
+
+#buscar-vehiculo {
+    background-color: var(--dark2);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--teal);
+    border-radius: var(--r-card);
+    padding: clamp(1.25rem, 0.9rem + 1.4vw, 2rem);
+    margin-top: clamp(2rem, 1.4rem + 2vw, 2.75rem);
 }
 
-#mensajes.error {
-    background-color: #450a0a;
-    border: 1px solid #ef4444;
-    color: #ef4444;
+#buscar-vehiculo h2 {
+    color: var(--dim);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    margin: 0 0 0.85rem;
 }
-/* Tarjetas de vehiculos */
+
+#buscar-vehiculo input {
+    display: block;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    color: var(--white);
+    padding: 12px 16px;
+    border-radius: var(--r-inner);
+    font-family: var(--body);
+    font-size: clamp(15px, 1.1vw, 17px);
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+#buscar-vehiculo input::placeholder {
+    color: var(--dim);
+}
+
+#buscar-vehiculo input:hover {
+    border-color: var(--line-fuerte);
+}
+
+#buscar-vehiculo input:focus-visible {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(65, 235, 212, 0.18);
+}
+
+#resultado-busqueda:not(:empty) {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    animation: entrada 160ms ease-out both;
+}
+
+#resultado-busqueda .item {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Catalogo */
+
 #vehiculos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: clamp(0.9rem, 0.6rem + 1vw, 1.4rem);
+    margin-top: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
 }
 
 .item {
-    background-color: #141414;
-    border: 1px solid #27272a;
-    border-radius: 8px;
-    padding: 1.2rem;
-    transition: border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    padding: clamp(1.25rem, 1rem + 0.8vw, 1.6rem);
+    box-shadow: var(--sdark);
+    transition: border-color 180ms ease, transform 180ms ease;
 }
 
 .item:hover {
-    border-color: #22c55e;
+    border-color: rgba(65, 235, 212, 0.35);
 }
 
 .item h4 {
-    color: #ffffff;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
+    color: var(--white);
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 0.9rem;
+    text-wrap: balance;
+}
+
+.item img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: center;
+    border-radius: var(--r-inner);
+    background-color: rgba(255, 255, 255, 0.03);
+    margin-bottom: 1rem;
 }
 
 .item .precio {
-    color: #a1a1aa;
-    margin-bottom: 0.3rem;
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: clamp(16px, 1.1vw, 19px);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    margin-bottom: 0.9rem;
+    overflow-wrap: anywhere;
 }
 
 .item .stock {
-    color: #22c55e;
-    font-weight: bold;
-    margin-bottom: 1rem;
+    align-self: flex-start;
+    color: var(--dim);
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 1.25rem;
 }
 
 .item button {
     width: 100%;
-    background-color: #22c55e;
-    color: #0a0a0a;
+    margin-top: auto;
+    min-height: 42px;
+    padding: 10px 16px;
+    color: var(--white);
+    background-image: var(--gprimario);
+    background-size: 100% 100%;
     border: none;
-    padding: 0.6rem;
-    border-radius: 6px;
-    font-weight: bold;
+    border-radius: var(--r-pill);
+    box-shadow: 0 10px 26px rgba(141, 51, 255, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .item button:hover {
-    opacity: 0.85;
+    filter: brightness(1.12);
+    box-shadow: 0 14px 32px rgba(141, 51, 255, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
-/* Tarjetas de entrega */
+.item button:active {
+    transform: translateY(1px);
+}
+
+/* Area de entrega: vehiculo comprometido */
+
 #entrega {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: clamp(0.9rem, 0.6rem + 1vw, 1.4rem);
+    margin-top: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
 }
 
 .itemEntrega {
-    background-color: #141414;
-    border: 1px solid #eab308;
-    border-radius: 8px;
-    padding: 1.2rem;
-    transition: border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark2);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--purple);
+    border-radius: var(--r-card);
+    padding: clamp(1.25rem, 1rem + 0.8vw, 1.6rem);
+    box-shadow: var(--sdark);
+    transition: border-color 180ms ease;
 }
 
 .itemEntrega:hover {
-    border-color: #facc15;
+    border-color: rgba(141, 51, 255, 0.45);
+    border-left-color: var(--purple);
 }
 
 .itemEntrega h4 {
-    color: #ffffff;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
+    color: var(--white);
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 0.9rem;
+    text-wrap: balance;
 }
 
 .itemEntrega p {
-    color: #a1a1aa;
-    margin-bottom: 1rem;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+}
+
+.itemEntrega p:first-of-type {
+    color: var(--teal);
+    font-size: clamp(16px, 1.1vw, 19px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
 }
 
 .itemEntrega button {
     width: 100%;
-    background-color: #eab308;
-    color: #0a0a0a;
-    border: none;
-    padding: 0.6rem;
-    border-radius: 6px;
-    font-weight: bold;
+    margin-top: 1.1rem;
+    min-height: 42px;
+    padding: 10px 16px;
+    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--line-fuerte);
+    border-radius: var(--r-pill);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: border-color 180ms ease, background-color 180ms ease;
 }
 
 .itemEntrega button:hover {
-    opacity: 0.85;
+    border-color: var(--purple);
+    background-color: rgba(141, 51, 255, 0.14);
 }
 
-/* Seccion agregar vehiculo */
+/* Consola de alta */
+
 #agregar-vehiculo {
     display: flex;
-    gap: 0.8rem;
     flex-wrap: wrap;
-    align-items: center;
-    margin: 1rem 0;
+    gap: 12px;
+    margin-top: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
 }
 
 #agregar-vehiculo input {
-    background-color: #141414;
-    border: 1px solid #27272a;
-    color: #e4e4e7;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    flex: 1 1 150px;
+    min-width: 0;
+    min-height: 42px;
+    padding: 10px 16px;
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    border-radius: var(--r-inner);
+    font-family: var(--body);
+    font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
-}
-
-#agregar-vehiculo input:focus {
-    border-color: #22c55e;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 #agregar-vehiculo input::placeholder {
-    color: #52525b;
+    color: var(--dim);
 }
 
-#agregar-vehiculo button{
-    background-color: #eab308;
-    color: #0a0a0a;
+#agregar-vehiculo input:hover {
+    border-color: var(--line-fuerte);
+}
+
+#agregar-vehiculo input:focus-visible {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(65, 235, 212, 0.18);
+}
+
+#agregar-vehiculo input[type="number"] {
+    text-align: right;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+}
+
+#agregar-vehiculo button {
+    flex: 1 1 170px;
+    min-height: 42px;
+    padding: 10px 16px;
+    color: var(--white);
+    background-image: var(--gprimario);
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    font-weight: bold;
+    border-radius: var(--r-pill);
+    box-shadow: 0 10px 26px rgba(141, 51, 255, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: filter 180ms ease, box-shadow 180ms ease;
 }
 
 #agregar-vehiculo button:hover {
-    opacity: 0.85;
-}
-#buscar-vehiculo input{
-    background-color: #141414;
-    border: 1px solid #27272a;
-    color: #e4e4e7;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
+    filter: brightness(1.12);
+    box-shadow: 0 14px 32px rgba(141, 51, 255, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
-#eliminar-entregas{
-    background-color: #eab308;
-    color: #0a0a0a;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    font-weight: bold;
+/* Conversor de divisas */
+
+#divisas {
+    background-color: var(--dark2);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--purple);
+    border-radius: var(--r-card);
+    padding: clamp(1.25rem, 0.9rem + 1.4vw, 2rem);
+    margin-top: clamp(1.25rem, 0.9rem + 1.2vw, 1.75rem);
+    box-shadow: var(--sdark);
+}
+
+/*Bootstrap pone margin-bottom 1rem en cada <p> y su selector le gana al reset universal,
+  asi que lo neutralizo aca para que el resultado quede alineado con el input*/
+#divisas p {
+    margin: 0;
+}
+
+#divisas > h3 {
+    color: var(--dim);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 0.85rem;
+}
+
+#divisas .cotizacion {
+    width: fit-content;
+    color: var(--teal);
+    background-color: rgba(65, 235, 212, 0.07);
+    border: 1px solid rgba(65, 235, 212, 0.35);
+    border-radius: var(--r-pill);
+    padding: 5px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+#divisas .cotizacion span {
+    color: var(--dim);
+    margin-left: 6px;
+}
+
+#divisas .conversor {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: clamp(0.9rem, 0.6rem + 1vw, 1.4rem);
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+
+#divisas .campo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+#divisas .campo:last-child {
+    text-align: right;
+}
+
+#divisas .campo > label {
+    color: var(--dim);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+#divisas input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 12px 16px;
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    border-radius: var(--r-inner);
+    font-family: var(--mono);
+    font-size: clamp(15px, 1.1vw, 17px);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    outline: none;
+    /*Saco los controles nativos del input number: son invisibles sobre el fondo oscuro y aca se tipea, no se gira*/
+    appearance: textfield;
+    -moz-appearance: textfield;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+#divisas input::-webkit-outer-spin-button,
+#divisas input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#divisas input::placeholder {
+    color: var(--dim);
+}
+
+#divisas input:hover {
+    border-color: var(--line-fuerte);
+}
+
+#divisas input:focus-visible {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(65, 235, 212, 0.18);
+}
+
+#resultado-pesos {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 42px;
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: clamp(22px, 2.2vw, 34px);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+#divisas .flecha {
+    align-self: center;
+    color: var(--dim);
+    font-size: 18px;
+    line-height: 1;
+}
+
+#divisas .reintentar {
+    min-height: 42px;
+    padding: 10px 18px;
+    margin-top: 1.25rem;
+    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--line-fuerte);
+    border-radius: var(--r-pill);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+#divisas .reintentar:hover {
+    border-color: var(--purple);
+    background-color: rgba(141, 51, 255, 0.14);
+}
+
+#divisas .reintentar:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+}
+
+/* En pantallas angostas la conversion se apila y la flecha deja de tener sentido */
+
+@media (max-width: 640px) {
+    #divisas .conversor {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    #divisas .campo:last-child {
+        text-align: left;
+    }
+
+    #resultado-pesos {
+        justify-content: flex-start;
+    }
+
+    #divisas .flecha {
+        display: none;
+    }
+}
+
+/* Accion destructiva */
+
+#eliminar-entregas {
+    align-self: flex-start;
+    min-height: 42px;
+    margin-top: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+    padding: 10px 18px;
+    color: var(--rojo);
+    background: transparent;
+    border: 1px solid rgba(255, 92, 92, 0.4);
+    border-radius: var(--r-pill);
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 180ms ease, border-color 180ms ease;
 }
 
 #eliminar-entregas:hover {
-    opacity: 0.85;
+    background-color: rgba(255, 92, 92, 0.12);
+    border-color: var(--rojo);
 }
 
+/* Foco visible */
+
+.item button:focus-visible,
+#agregar-vehiculo button:focus-visible,
+#agregar-vehiculo input:focus-visible,
+#buscar-vehiculo input:focus-visible,
+#divisas input:focus-visible,
+#eliminar-entregas:focus-visible,
+.itemEntrega button:focus-visible,
+body > a:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+}
+
+/* Mensajes en linea */
+
+#mensajes {
+    display: none;
+    padding: 14px 18px;
+    margin-top: 1.25rem;
+    border-radius: var(--r-inner);
+    border: 1px solid var(--line);
+    background-color: var(--dark2);
+    font-size: 15px;
+}
+
+#mensajes p {
+    margin: 0;
+}
+
+#mensajes.exito {
+    color: var(--teal);
+    border-color: rgba(65, 235, 212, 0.35);
+    background-color: rgba(65, 235, 212, 0.07);
+}
+
+#mensajes.error {
+    color: var(--rojo);
+    border-color: rgba(255, 92, 92, 0.35);
+    background-color: rgba(255, 92, 92, 0.07);
+}
+
+/* Estados generados por JavaScript */
+
 .cargando {
-    color: #facc15;
-    font-weight: bold;
-    padding: 1rem 0;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 6px 0;
 }
 
 .error-carga {
-    color: #ef4444;
-    font-weight: bold;
-    padding: 1rem 0;
-
+    color: var(--rojo);
+    font-size: 15px;
+    padding: 6px 0;
 }
