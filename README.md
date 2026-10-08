@@ -42,11 +42,6 @@ Software de gestión de stock de vehículos para concesionarias. Permite buscar,
 └── README.md
 ```
 
-## Ejecución
-
-El proyecto es estático, no requiere instalación de dependencias ni build. Sin embargo, **necesita un servidor local** porque carga los datos con `fetch("./data/vehiculos.json")`, lo que falla al abrir el archivo directamente con `file://`.
-
-
 ## Datos y persistencia
 
 ### Esquema del vehículo
